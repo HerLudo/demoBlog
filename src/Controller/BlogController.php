@@ -147,6 +147,8 @@ class BlogController extends AbstractController
         // Si le formulaire a bien été validé (isSubmitted) et que l'objet entité est correctement remplit (isValid) alors on entre dans le condition IF
         if($formArticle->isSubmitted() && $formArticle->isValid())
         {
+            $user=$this->getUser();
+            $article->setUserId($user);
             // Le seul setter que l'on appel de l'entité, c'est celui de la date puisqu'il n'y a pas de champ 'date' dans le formulaire
 
             // Si l'article ne possède pas d'id, c'est une insertion, alors on entre dans la condition IF et on génère une date d'article

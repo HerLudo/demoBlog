@@ -1,0 +1,15 @@
+{% extends "base_admin.html.twig" %}
+
+{% block title %}
+    BlogSymfony | Modification commentaire
+{% endblock %}
+
+
+{% block body %}
+    <h1 class="text-center my-5"></h1>
+
+    {{ form_start(formComment) }}
+        {{ form_widget(formComment) }}
+        <button class="btn btn-dark" type="submit">Enregistrer les modifications</button>
+    {{ form_end(formComment)}}
+{% endblock %}

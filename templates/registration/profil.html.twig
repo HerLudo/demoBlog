@@ -12,7 +12,7 @@
         <p class="text-center text-secondary">Vous êtes ADMINISTRATEUR du site</p>
     {% endif %}
 
-    {# {{ dump(user) }} #}
+    {# {{ dump(user.articleId) }} #}
 
     <div class="col-6 mx-auto accordion mb-5" id="accordionExample">
         <div class="accordion-item">
@@ -94,5 +94,33 @@
             </div>
         </div>
     </div>
+    {% if user.articleId is not empty %}
+        
     
+    <div class="mx-auto">
+        <h2 class="text-center my-5">Liste des articles que vous avez publié :</h2>
+        <table class="table table-borderless text-center align-middle" id="table-profil">
+                <tr class="text-center">
+                    <th>Titre</th>
+                    <th>Contenu</th>
+                    <th>Catégorie</th>
+                    <th>Date - Heure</th>
+                    <th>Voir</th>
+                    <th>Modifier</th>
+                </tr>
+            {% for info in user.articleId %}
+                <tr>
+                    <td>{{info.titre}}</td>
+                    <td>{{info.contenu|slice(0,100) }} [...]</td>
+                    <td><a href="{{ path('blog_categorie', {'id': info.category.id}) }}" class="text-decoration-none">{{info.category.titre}}</a></td>
+                    <td>Publié le {{info.date|date("m/d/Y")}} à {{info.date|date ("H:i:s")}}</td>
+                    <td><a href="{{ path('blog_show', {'id': info.id}) }}" class="info display-4"><i class="bi bi-eye-fill"></i></a></td>
+                    <td><a href="{{ path('blog_edit', {'id':info.id}) }}" class="primary display-4"><i class="bi bi-pencil-square"></i></a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+   {% endif %} 
+
 {% endblock %}

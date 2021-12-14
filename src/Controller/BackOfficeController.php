@@ -5,11 +5,15 @@ namespace App\Controller;
 use App\Entity\Article;
 use App\Entity\Category;
 use App\Entity\Comment;
+use App\Entity\User;
 use App\Form\ArticleType;
 use App\Form\CategoryType;
+use App\Form\CommentType;
+use App\Form\RegistrationFormType;
 use App\Repository\ArticleRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\CommentRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -67,6 +71,7 @@ class BackOfficeController extends AbstractController
     #[Route('/admin/article/{id}/update', name: 'app_admin_article_update')]
     public function adminArticleForm(Request $request, EntityManagerInterface $manager, Article $article = null): Response
     {
+        // dd($request);
         // Si $article contient un article de la BDD, on stock une variable la photo de l'article afin de la renvoyer en BDD si nous ne modifions pas la photo de l'article
         if($article)
         {
@@ -84,6 +89,10 @@ class BackOfficeController extends AbstractController
 
         if($formAdminArticle->isSubmitted() && $formAdminArticle->isValid())
         {
+            $user=$this->getUser();
+
+            $article->setUserId($user);
+            
             // Si l'article possède un ID, alors c'est une modification, on change le texte dans le message de validation
             if($article->getId())
                 $txt = 'modifié';
@@ -254,11 +263,97 @@ class BackOfficeController extends AbstractController
             'commentaires' => $commentaires
         ]); 
     }
+
+
     #[Route ('/admin/commentaire/{id}/update', name: 'app_admin_commentaire_update')]
-    public function adminCommentaireUpdate():Response
+    public function adminCommentaireUpdate(Comment $comment, EntityManagerInterface $manager, Request $request):Response
     {
+        
+        // dd($comment);
+
+        $formComment=$this->createForm(CommentType::class,$comment, [
+            'commentFormBack'=>true
+        ]);
+
+        $formComment->handleRequest($request);
+
+        if($formComment->isSubmitted() && $formComment->isValid())
+        {
+            $auteur=$comment->getAuteur();
+
+            $manager->persist($comment);
+            $manager->flush();
+
+            $this->addFlash('success', "Le commentaire posté par $auteur a bien été modifié.");
+
+            return $this->redirectToRoute('app_admin_commentaires');
+        }
+
+
         return $this->render('back_office/admin_commentaire_update.html.twig', [
+            'formComment'=>$formComment->createView()
 
         ]);
     }
+
+
+    #[Route ('admin/user', name: 'app_admin_user') ]
+    #[Route('/admin/user/{id}/remove', name: 'app_admin_user_remove')]
+    #[Route ('/admin/user/{id}/update', name: 'app_admin_user_update')]
+    public function adminUser(UserRepository $repoUser, EntityManagerInterface $manager, User $user=null, Request $request):Response
+    {
+        //Si user retourne true, cela veut dire que $user contient les informations d'1 user stocké en BDD.
+        if($user)
+        {
+            if($request->query->get('op') == 'update')
+            {
+                $formUser = $this->createForm(RegistrationFormType::class,$user, [
+                    'userUpdateBack'=>true
+                ]);
+
+                $formUser->handleRequest($request);
+
+                if($formUser->isSubmitted() && $formUser->isValid() )
+                {
+                    $infos=$user->getPrenom().' '.$user->getNom();
+
+                    $manager->persist($user);
+                    $manager->flush();
+
+                    $this->addFlash('success', "L'utilisateur $infos a été modifié avec succès");
+
+                    return $this->redirectToRoute('app_admin_user');
+                }
+                
+            }
+            elseif ($request->query->get('op')=='delete')
+            {
+                $utilisateur=$user->getPrenom().' '.$user->getNom();
+                $manager->remove($user);
+                $manager->flush();
+
+                $this->addFlash('success', "L'utilisateur $utilisateur a été supprimé avec succès");
+                
+                return $this->redirectToRoute('app_admin_user');
+            }
+        }
+
+        $colonnes = $manager->getClassMetadata(User::class)->getFieldNames();
+        $allUsers = $repoUser->findAll();
+
+
+        return $this->render('back_office/admin_user.html.twig', [
+            'colonnes'=>$colonnes,
+            'users'=>$allUsers,
+            //Si l'indice dans l'URL est 'op=update' alors on exécute createView() sur l'objet formUserupdate pour générer le formulaire, sinon on stocke une chaine de caractère vide pour éviter une erreur
+            'formUser'=>($request->query->get('op')=='update') ? $formUser->createView() : '',
+            'user'=>$user,
+        ]);
+    }
+
 }
+/* Exo : Le but est de relier les utilisateurs aux articles, lorsque l'internaute poste un article, il faut une relation entre Article et User.
+Créer une nouvelle propriété dans l'entité user 'article' et faire une relation OnetoMany, cette propriété peut-être null
+Lorsque l'internaute poste un nouvel article, il faut faire en sorte de renseigner la clé étrangère 'user_id' afin que l'article soit relié à l'utilisateur connecté.
+Dans la page profil de l'utilisateur, afficher dans une liste tous les articles postés par l'internaute (titre, article, lien qui redirige vers l'article), date/heure et un lien pour la modification. 
+*/

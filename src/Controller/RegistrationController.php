@@ -70,6 +70,7 @@ class RegistrationController extends AbstractController
     #[Route('/profil', name: 'app_profil')]
     public function userProfil(): Response
     {
+        
         // Si getUser() est null, et ne renvoi aucune données, cela veut que l'internaute n'est pas authentifié, il n'a rien à faire sur la route '/profil', on le redirige vers la route de connexion '/login'
         if(!$this->getUser())
         {
@@ -81,7 +82,8 @@ class RegistrationController extends AbstractController
         // dd($user);
 
         return $this->render('registration/profil.html.twig', [
-            'user' => $user
+            'user' => $user,
+
         ]);
     }
 

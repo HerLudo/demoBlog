@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -61,6 +63,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="integer")
      */
     private $codePostal;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Article::class, mappedBy="user_id")
+     */
+    private $article_id;
+
+    public function __construct()
+    {
+        $this->article_id = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -191,4 +203,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    /**
+     * @return Collection|Article[]
+     */
+    public function getArticleId(): Collection
+    {
+        return $this->article_id;
+    }
+
+    public function addArticleId(Article $articleId): self
+    {
+        if (!$this->article_id->contains($articleId)) {
+            $this->article_id[] = $articleId;
+            $articleId->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeArticleId(Article $articleId): self
+    {
+        if ($this->article_id->removeElement($articleId)) {
+            // set the owning side to null (unless already changed)
+            if ($articleId->getUserId() === $this) {
+                $articleId->setUserId(null);
+            }
+        }
+
+        return $this;
+    }
+
 }
