@@ -1,0 +1,44 @@
+{% extends 'base_admin.html.twig' %}
+{% block title %}
+    BlogSymfony | {% if editMode %}
+        Modifier l'article
+    {% else %}
+        Ajouter un article
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    
+        <h1 class="text-center my-5">
+            {% if editMode %}
+                Modifier l'article {{editMode}}
+            {% else %}
+                Ajouter un article</h1>
+            {% endif %}
+        </h1>   
+            <div class="col-8 mx-auto">
+            {{form_start(formArticle)}}
+                {{form_row(formArticle.titre)}}
+                {{form_row(formArticle.category)}}
+                {{form_row(formArticle.contenu)}}
+                {{form_row(formArticle.photo)}}
+                
+                {% if photoActuelle %}
+                <em>Vous pouvez modifier l'image si vous le souhaitez</em>
+                <p>
+                    <img src="{{ asset('uploads/photos/' ~ photoActuelle) }}" alt="" class="img-responsive">
+                </p>
+                {% endif %}
+
+            <button type="submit" class="btn btn-dark mb-5">
+                {% if editMode %}        
+                    Enregistrer les modifications
+                {% else %}       
+                    Enregistrer l'article
+                {% endif %}
+            </button>
+
+            {{form_end(formArticle)}}
+</div>
+
+{% endblock %}

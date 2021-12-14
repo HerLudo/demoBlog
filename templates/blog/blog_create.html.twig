@@ -1,0 +1,80 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+
+    Blog Symfony |
+
+    {% if editMode %}
+        Modification de l'article
+    {% else %}
+        {# Sinon l'article ne possède pas d'id, c'est une insertion #}
+        Nouvel article
+    {% endif %}
+
+{% endblock %}
+
+{% block body %}
+
+    <h1 class="text-center my-5">
+    {# Si editMode renvoi TRUE, cela veut dire que l'id possède un ID, c'est une modification #}
+    {% if editMode %}
+        Modification de l'article
+    {% else %}
+        {# Sinon l'article ne possède pas d'id, c'est une insertion #}
+        Nouvel article
+    {% endif %}
+    </h1>
+
+    {# 1ère version du formulaire #}
+    {# <form method="post">
+        <div class="mb-3">
+            <label for="titre" class="form-label">Titre</label>
+            <input type="text" class="form-control" id="titre" name="titre">
+        </div>
+        <div class="mb-3">
+            <label for="contenu" class="form-label">Contenu</label>
+            <textarea type="text" class="form-control" id="contenu" rows="10" name="contenu"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="photo" class="form-label">Photo</label>
+            <input type="text" class="form-control" id="photo" name="photo">
+        </div>
+        <button type="submit" class="btn btn-dark mb-5">Enregistrer</button>
+    </form> #}
+
+    {# 2ème version du formulaire #}
+    {# formArticle ne sort pas de null, c'est le résultat du createView(), c'est ce que le controller a transmit au template, il contient tout les champs du formulaire #}
+    {# form_start(), form_end() : fonction twig permettant de mettre en forme et d'afficher le formulaire #}
+
+    {# <form method="post"> #}
+    {{ form_start(formArticle) }}
+
+        {{ form_row(formArticle.titre) }}
+
+        {{ form_row(formArticle.category) }}
+
+        {{ form_row(formArticle.contenu) }}
+
+        {{ form_row(formArticle.photo) }}
+
+        {# Si photoActuelle retourne TRUE, cela veut dire que l'article possède une photo, c'est une modification, alors on entre dans la condition IF et on affiche la photo actuelle de l'article #}
+        {% if photoActuelle %}
+            
+            <em>Vous pouvez une nouvelle photo si vous souhaitez la modifier</em>
+            <p class="col-2">
+                <img src="{{ asset('uploads/photos/' ~ photoActuelle) }}" alt="" class="col-12 img-responsive">
+            </p>
+
+        {% endif %}
+
+        <button type="submit" class="btn btn-dark mb-5">
+        {% if editMode %}
+            Enregistrer les modifications
+        {% else %}
+            Enregistrer
+        {% endif %}
+        </button>
+
+    {{ form_end(formArticle) }}
+    
+{% endblock %}
